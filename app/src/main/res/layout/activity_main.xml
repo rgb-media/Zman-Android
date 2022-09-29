@@ -132,81 +132,92 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <androidx.appcompat.widget.LinearLayoutCompat
+    <ScrollView
         android:visibility="invisible"
         android:id="@+id/menuContainer"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_below="@id/headerHP"
-        android:orientation="vertical" >
+        android:scrollbars="none"
+        android:overScrollMode="never" >
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="@color/zman_main" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            android:id="@+id/menuRecyclerView"
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/recyclerviewContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:background="@color/zman_main" />
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/zman_main" >
+            android:orientation="vertical" >
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginLeft="40dp"
-                android:layout_marginRight="40dp"
-                android:background="#5FFF"/>
+                android:layout_height="40dp"
+                android:background="@color/zman_main" />
 
-        </FrameLayout>
-
-        <RelativeLayout
-            android:background="@color/zman_main"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
-
-            <androidx.appcompat.widget.LinearLayoutCompat
-                android:layout_width="wrap_content"
+            <androidx.recyclerview.widget.RecyclerView
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                android:id="@+id/menuRecyclerView"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="25dp"
-                android:layout_marginBottom="18dp"
-                android:alpha="0.7"
-                android:orientation="horizontal" >
+                android:layout_alignParentRight="true"
+                android:scrollbars="none"
+                android:overScrollMode="never"
+                android:background="@color/zman_main" />
 
-                <TextView
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/zman_main" >
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginLeft="40dp"
+                    android:layout_marginRight="40dp"
+                    android:background="#5FFF"/>
+
+            </FrameLayout>
+
+            <RelativeLayout
+                android:background="@color/zman_main"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <androidx.appcompat.widget.LinearLayoutCompat
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginRight="8dp"
-                    android:fontFamily="@font/fedra_sans_book"
-                    android:textSize="14dp"
-                    android:textColor="@android:color/white"
-                    android:text="By"/>
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="25dp"
+                    android:layout_marginBottom="18dp"
+                    android:alpha="0.7"
+                    android:orientation="horizontal" >
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:src="@drawable/toi_logo" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginRight="8dp"
+                        android:fontFamily="@font/fedra_sans_book"
+                        android:textSize="14dp"
+                        android:textColor="@android:color/white"
+                        android:text="By"/>
 
-            </androidx.appcompat.widget.LinearLayoutCompat>
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:src="@drawable/toi_logo" />
 
-        </RelativeLayout>
+                </androidx.appcompat.widget.LinearLayoutCompat>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:background="@drawable/menu_triangle"/>
+            </RelativeLayout>
 
-    </androidx.appcompat.widget.LinearLayoutCompat>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/menu_triangle"/>
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+    </ScrollView>
 
     <View
         android:layout_width="match_parent"

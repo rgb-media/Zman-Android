@@ -10,8 +10,9 @@ import com.rgbmedia.zman.R
 import com.rgbmedia.zman.ZmanApplication
 import com.rgbmedia.zman.utils.LoginState
 import com.rgbmedia.zman.viewmodels.MainMenuElement
+import com.rgbmedia.zman.viewmodels.MainViewModel
 
-class MenuAdapter(private val dataSet: List<MainMenuElement>) : RecyclerView.Adapter<MenuAdapter.ViewHolder>() {
+class MenuAdapter(private val dataSet: List<MainMenuElement>, private val mainViewModel: MainViewModel) : RecyclerView.Adapter<MenuAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val textView: TextView
@@ -32,7 +33,7 @@ class MenuAdapter(private val dataSet: List<MainMenuElement>) : RecyclerView.Ada
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        val data = dataSet.get(position)
+        val data = dataSet[position]
         val menuElement = data.item
 
         viewHolder.textView.text = menuElement.title
@@ -47,7 +48,7 @@ class MenuAdapter(private val dataSet: List<MainMenuElement>) : RecyclerView.Ada
             viewHolder.itemView.setOnClickListener {
                 data.expanded = !data.expanded
 
-                notifyDataSetChanged()
+                notifyItemChanged(position)
             }
         } else {
             if (menuElement.type == "login" && LoginState.isLoggedIn()) {
@@ -58,11 +59,12 @@ class MenuAdapter(private val dataSet: List<MainMenuElement>) : RecyclerView.Ada
         }
 
         if (data.expanded) {
-            viewHolder.itemsRecyclerView.adapter = MenuItemsAdapter(menuElement.items.toList())
+            viewHolder.itemsRecyclerView.adapter = MenuItemsAdapter(menuElement.items.toList(), mainViewModel, position)
         } else {
             viewHolder.itemsRecyclerView.adapter = null
         }
     }
 
     override fun getItemCount() = dataSet.size
+
 }
