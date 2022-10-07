@@ -7,15 +7,19 @@ import androidx.lifecycle.viewModelScope
 import com.rgbmedia.zman.HOMEPAGE_URL
 import com.rgbmedia.zman.models.MenuElement
 import com.rgbmedia.zman.network.MenuRepository
+import com.rgbmedia.zman.network.NewsletterRepository
 import kotlinx.coroutines.launch
 
-class MainViewModel(private val menuRepository: MenuRepository) : ViewModel() {
+class MainViewModel(private val menuRepository: MenuRepository,
+                    private val newsletterRepository: NewsletterRepository) : ViewModel() {
 
     private var menuLiveData = MutableLiveData<List<MainMenuElement>>()
     private var showMenu = MutableLiveData(false)
     private var webviewUrlString = MutableLiveData(HOMEPAGE_URL)
     private var selectedMenuItem = MutableLiveData(Pair(0, 0))
     private var oldSelectedMenuItem = Pair(0, 0)
+    private var newsletterResponse = MutableLiveData("")
+    private var newsletterPosition = Pair(0, 0)
 
     fun getMenu(): LiveData<List<MainMenuElement>> {
         return menuLiveData
@@ -51,6 +55,24 @@ class MainViewModel(private val menuRepository: MenuRepository) : ViewModel() {
 
     fun setOldSelectedMenuItem(pair: Pair<Int, Int>) {
         oldSelectedMenuItem = pair
+    }
+
+    fun getNewsletterPosition(): Pair<Int, Int> = newsletterPosition
+
+    fun setNewsletterPosition(position: Pair<Int, Int>) {
+        newsletterPosition = position
+    }
+
+    fun getNewsletterResponse(): LiveData<String> {
+        return newsletterResponse
+    }
+
+    fun sendEmail(email: String) {
+        viewModelScope.launch {
+            val response = newsletterRepository.sendEmail(email)
+
+            newsletterResponse.value = response
+        }
     }
 
     init {

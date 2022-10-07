@@ -17,23 +17,27 @@ import com.rgbmedia.zman.adapters.MenuAdapter
 import com.rgbmedia.zman.databinding.ActivityMainBinding
 import com.rgbmedia.zman.network.MenuRepository
 import com.rgbmedia.zman.network.MenuService
+import com.rgbmedia.zman.network.NewsletterRepository
+import com.rgbmedia.zman.network.NewsletterService
 import com.rgbmedia.zman.utils.Utils
 import com.rgbmedia.zman.viewmodels.MainViewModel
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 
 class MainActivity : AppCompatActivity() {
 
-    class MenuViewModelFactory(private val api: MenuRepository) : ViewModelProvider.Factory {
+    class MenuViewModelFactory(private val menuApi: MenuRepository,
+                               private val newsletterApi: NewsletterRepository) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return MainViewModel(api) as T
+            return MainViewModel(menuApi, newsletterApi) as T
         }
     }
 
     private lateinit var binding: ActivityMainBinding
 
-    private val api by lazy {
+    private val menuApi by lazy {
         val retrofit = Retrofit.Builder()
             .addConverterFactory(GsonConverterFactory.create())
             .baseUrl(MENU_URL)
@@ -43,7 +47,17 @@ class MainActivity : AppCompatActivity() {
 
         MenuRepository(api)
     }
-    private val mainViewModel: MainViewModel by viewModels { MenuViewModelFactory(api) }
+    private val newsletterApi by lazy {
+        val retrofit = Retrofit.Builder()
+            .addConverterFactory(ScalarsConverterFactory.create())
+            .baseUrl(SENDGRID_URL)
+            .build()
+
+        val api = retrofit.create(NewsletterService::class.java)
+
+        NewsletterRepository(api)
+    }
+    private val mainViewModel: MainViewModel by viewModels { MenuViewModelFactory(menuApi, newsletterApi) }
 
     private var menuHeight = -1
 
@@ -58,6 +72,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(view)
 
         getMenu()
+
+        setupNewsletter()
 
         setupArticleHeader()
 
@@ -142,6 +158,20 @@ class MainActivity : AppCompatActivity() {
 
         binding.menuButton.setOnClickListener {
             mainViewModel.setShowMenu(!mainViewModel.getShowMenu().value!!)
+        }
+    }
+
+    private fun setupNewsletter() {
+        mainViewModel.getNewsletterResponse().observe(this) {
+            if (it.lowercase() == "success") {
+                val viewHolder = binding.menuRecyclerView.findViewHolderForAdapterPosition(mainViewModel.getNewsletterPosition().first)
+                if (viewHolder != null) {
+                    val menuViewHolder = viewHolder as MenuAdapter.ViewHolder
+                    menuViewHolder.itemsRecyclerView.adapter?.notifyItemChanged(mainViewModel.getNewsletterPosition().second)
+                }
+            } else if (it.isNotEmpty()) {
+                Utils.showSimpleAlert(this, TEXT_GENERIC_ERROR, it)
+            }
         }
     }
 

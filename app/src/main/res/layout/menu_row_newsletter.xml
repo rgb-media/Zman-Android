@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="48dp"
+    android:paddingRight="48dp" >
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="18dp"
+        android:background="@android:color/white"
+        android:alpha="0.2"/>
+
+    <RelativeLayout
+        android:id="@+id/newsletterContainer"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginBottom="18dp"
+        android:background="@drawable/newsletter_border_white" >
+
+        <ImageView
+            android:id="@+id/subscribeButton"
+            android:layout_width="72dp"
+            android:layout_height="40dp"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="4dp"
+            android:scaleType="center"
+            android:background="@drawable/subscribe_white"
+            android:src="@drawable/subscribe" />
+
+        <EditText
+            android:id="@+id/emailEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/subscribeButton"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="16dp"
+            android:gravity="right"
+            android:inputType="textEmailAddress"
+            android:maxLines="1"
+            android:imeOptions="actionDone"
+            android:background="@null"
+            android:fontFamily="@font/fedra_sans_book"
+            android:textSize="16dp"
+            android:textColor="@android:color/white"
+            android:hint="המייל שלך" />
+
+        <TextView
+            android:id="@+id/newsletterTextView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="4dp"
+            android:gravity="center"
+            android:transformPivotX="0dp"
+            android:background="@drawable/subscribe_white"
+            android:fontFamily="@font/fedra_sans_bold"
+            android:textSize="14dp"
+            android:textColor="@color/zman_main"
+            android:text="הרשמתכם בוצעה בהצלחה" />
+
+    </RelativeLayout>
+
+</androidx.appcompat.widget.LinearLayoutCompat>
