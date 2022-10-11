@@ -2,13 +2,14 @@ package com.rgbmedia.zman
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.os.Message
 import android.util.Log
 import android.view.View
 import android.view.ViewTreeObserver
-import android.webkit.JavascriptInterface
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.webkit.*
+import android.webkit.WebView.WebViewTransport
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
@@ -85,16 +86,43 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("SetJavaScriptEnabled")
     private fun initWebView() {
         binding.webView.settings.javaScriptEnabled = true
+        binding.webView.settings.javaScriptCanOpenWindowsAutomatically = true
+        binding.webView.settings.setSupportMultipleWindows(true)
         binding.webView.settings.userAgentString = binding.webView.settings.userAgentString + " rgbmedia-app android app"
         binding.webView.addJavascriptInterface(WebAppInterface(), "Android")
 
         binding.refresh.setOnRefreshListener { binding.webView.reload() }
 
         binding.webView.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                val url = request?.url.toString()
+
+                if (url.startsWith("mailto:")) {
+                    startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse(url)))
+
+                    return true
+                }
+
+                return super.shouldOverrideUrlLoading(view, request)
+            }
+
             override fun onPageFinished(view: WebView?, url: String?) {
                 if (binding.refresh.isRefreshing) {
                     binding.refresh.isRefreshing = false
                 }
+            }
+        }
+
+        binding.webView.webChromeClient = object : WebChromeClient() {
+            override fun onCreateWindow(view: WebView?, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message?): Boolean {
+                val newWebView = WebView(this@MainActivity)
+                binding.refresh.addView(newWebView)
+
+                val transport = resultMsg!!.obj as WebViewTransport
+                transport.webView = newWebView
+                resultMsg!!.sendToTarget()
+
+                return true
             }
         }
 
