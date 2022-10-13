@@ -10,16 +10,15 @@ import android.view.View
 import android.view.ViewTreeObserver
 import android.webkit.*
 import android.webkit.WebView.WebViewTransport
+import android.widget.RelativeLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.rgbmedia.zman.adapters.MenuAdapter
+import com.rgbmedia.zman.adapters.SearchAdapter
 import com.rgbmedia.zman.databinding.ActivityMainBinding
-import com.rgbmedia.zman.network.MenuRepository
-import com.rgbmedia.zman.network.MenuService
-import com.rgbmedia.zman.network.NewsletterRepository
-import com.rgbmedia.zman.network.NewsletterService
+import com.rgbmedia.zman.network.*
 import com.rgbmedia.zman.utils.Utils
 import com.rgbmedia.zman.viewmodels.MainViewModel
 import retrofit2.Retrofit
@@ -29,10 +28,11 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 class MainActivity : AppCompatActivity() {
 
     class MenuViewModelFactory(private val menuApi: MenuRepository,
-                               private val newsletterApi: NewsletterRepository) : ViewModelProvider.Factory {
+                               private val newsletterApi: NewsletterRepository,
+                               private val searchApi: SearchRepository) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return MainViewModel(menuApi, newsletterApi) as T
+            return MainViewModel(menuApi, newsletterApi, searchApi) as T
         }
     }
 
@@ -58,7 +58,17 @@ class MainActivity : AppCompatActivity() {
 
         NewsletterRepository(api)
     }
-    private val mainViewModel: MainViewModel by viewModels { MenuViewModelFactory(menuApi, newsletterApi) }
+    private val searchApi by lazy {
+        val retrofit = Retrofit.Builder()
+            .addConverterFactory(GsonConverterFactory.create())
+            .baseUrl(SEARCH_URL)
+            .build()
+
+        val api = retrofit.create(SearchService::class.java)
+
+        SearchRepository(api)
+    }
+    private val mainViewModel: MainViewModel by viewModels { MenuViewModelFactory(menuApi, newsletterApi, searchApi) }
 
     private var menuHeight = -1
 
@@ -75,6 +85,8 @@ class MainActivity : AppCompatActivity() {
         getMenu()
 
         setupNewsletter()
+
+        setupSearch()
 
         setupArticleHeader()
 
@@ -120,7 +132,7 @@ class MainActivity : AppCompatActivity() {
 
                 val transport = resultMsg!!.obj as WebViewTransport
                 transport.webView = newWebView
-                resultMsg!!.sendToTarget()
+                resultMsg.sendToTarget()
 
                 return true
             }
@@ -203,6 +215,32 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupSearch() {
+        binding.menuRecyclerView.viewTreeObserver.addOnGlobalLayoutListener {
+            positionSearchResultsView()
+        }
+
+        mainViewModel.getSearchResultsVisible().observe(this) {
+            if (it) {
+                binding.searchResultsRV.visibility = View.VISIBLE
+            } else {
+                binding.searchResultsRV.visibility = View.GONE
+            }
+        }
+
+        mainViewModel.getSearchResponse().observe(this) {
+            if (it != null && it.isNotEmpty()) {
+                positionSearchResultsView()
+
+                binding.searchResultsRV.adapter = SearchAdapter(it, mainViewModel)
+
+                mainViewModel.setSearchResultsVisible(true)
+            } else {
+                mainViewModel.setSearchResultsVisible(false)
+            }
+        }
+    }
+
     private fun setupArticleHeader() {
         binding.backButton.setOnClickListener {
             if (binding.webView.canGoBack()) {
@@ -229,6 +267,16 @@ class MainActivity : AppCompatActivity() {
             binding.webView.evaluateJavascript("rgb.closePopupArticleInApp()", null)
 
             binding.headerArticle.visibility = View.GONE
+        }
+    }
+
+    private fun positionSearchResultsView() {
+        val view = binding.menuRecyclerView.getChildAt(mainViewModel.getSearchPosition().first)
+
+        if (view != null) {
+            val layoutParams = binding.searchResultsRV.layoutParams as RelativeLayout.LayoutParams
+            layoutParams.topMargin = (view.y + view.height + 66).toInt()
+            binding.searchResultsRV.layoutParams = layoutParams
         }
     }
 

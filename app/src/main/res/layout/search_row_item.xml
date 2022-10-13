@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp" >
+
+    <TextView
+        android:id="@+id/taxonomyTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="10dp"
+        android:alpha="0.5"
+        android:fontFamily="@font/fedra_sans_book"
+        android:textSize="14dp"
+        android:textColor="@color/zman_main" />
+
+    <TextView
+        android:id="@+id/nameTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="10dp"
+        android:fontFamily="@font/fedra_sans_book"
+        android:textSize="14dp"
+        android:textColor="@color/zman_main" />
+
+</RelativeLayout>

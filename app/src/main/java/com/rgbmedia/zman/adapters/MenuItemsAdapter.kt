@@ -12,11 +12,16 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.content.ContextCompat
+import androidx.core.widget.doAfterTextChanged
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.RecyclerView
 import com.rgbmedia.zman.*
 import com.rgbmedia.zman.models.MenuItem
 import com.rgbmedia.zman.utils.Utils
 import com.rgbmedia.zman.viewmodels.MainViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MenuItemsAdapter(private val dataSet: List<MenuItem>, private val mainViewModel: MainViewModel,
                        private val mainElementIndex: Int) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -25,7 +30,7 @@ class MenuItemsAdapter(private val dataSet: List<MenuItem>, private val mainView
     val ITEM_TYPE_NEWSLETTER    = 2
     val ITEM_TYPE_SEARCH        = 3
 
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    class StandardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val textView: TextView
         val imageView: ImageView
         val sectionOn: ImageView
@@ -51,6 +56,18 @@ class MenuItemsAdapter(private val dataSet: List<MenuItem>, private val mainView
         }
     }
 
+    class SearchViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val searchButton: ImageView
+        val hintTV: TextView
+        val editText: EditText
+
+        init {
+            searchButton = view.findViewById(R.id.searchIV)
+            hintTV = view.findViewById(R.id.hintTV)
+            editText = view.findViewById(R.id.searchEditText)
+        }
+    }
+
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         if (viewType == ITEM_TYPE_NEWSLETTER) {
             val view = LayoutInflater.from(viewGroup.context).inflate(R.layout.menu_row_newsletter, viewGroup, false)
@@ -58,15 +75,50 @@ class MenuItemsAdapter(private val dataSet: List<MenuItem>, private val mainView
             return NewsletterViewHolder(view)
         }
 
+        if (viewType == ITEM_TYPE_SEARCH) {
+            val view = LayoutInflater.from(viewGroup.context).inflate(R.layout.menu_row_search, viewGroup, false)
+
+            return SearchViewHolder(view)
+        }
+
         val view = LayoutInflater.from(viewGroup.context).inflate(R.layout.menu_row_subitem, viewGroup, false)
 
-        return ViewHolder(view)
+        return StandardViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val menuItem = dataSet[position]
 
-        if (menuItem.type == "newsletter") {
+        if (menuItem.type == "search") {
+            mainViewModel.setSearchPosition(Pair(mainElementIndex, position))
+
+            val viewHolder = holder as SearchViewHolder
+
+            var searchJob: Job? = null
+
+            viewHolder.editText.doAfterTextChanged {
+                if (it.toString().isEmpty()) {
+                    viewHolder.searchButton.setImageResource(R.drawable.search)
+                    viewHolder.hintTV.visibility = View.VISIBLE
+                } else {
+                    viewHolder.searchButton.setImageResource(R.drawable.close_search)
+                    viewHolder.hintTV.visibility = View.GONE
+                }
+
+                searchJob?.cancel()
+                searchJob = mainViewModel.viewModelScope.launch {
+                    delay(1_000)
+
+                    mainViewModel.search(it.toString())
+                }
+            }
+
+            viewHolder.searchButton.setOnClickListener {
+                if (viewHolder.editText.text.isNotEmpty()) {
+                    viewHolder.editText.setText("")
+                }
+            }
+        } else if (menuItem.type == "newsletter") {
             val viewHolder = holder as NewsletterViewHolder
 
             if (mainViewModel.getNewsletterResponse().value?.lowercase() == "success") {
@@ -96,7 +148,7 @@ class MenuItemsAdapter(private val dataSet: List<MenuItem>, private val mainView
                 }
             }
         } else {
-            val viewHolder = holder as ViewHolder
+            val viewHolder = holder as StandardViewHolder
 
             viewHolder.textView.text = menuItem.title
 
@@ -106,9 +158,7 @@ class MenuItemsAdapter(private val dataSet: List<MenuItem>, private val mainView
                 viewHolder.sectionOn.visibility = View.INVISIBLE
             }
 
-            viewHolder.imageView.layoutParams.width =
-                ZmanApplication.instance.resources.getDimension(R.dimen.menu_subitem_image_witdh)
-                    .toInt()
+            viewHolder.imageView.layoutParams.width = ZmanApplication.instance.resources.getDimension(R.dimen.menu_subitem_image_witdh).toInt()
             viewHolder.imageView.visibility = View.GONE
 
             viewHolder.textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16f)

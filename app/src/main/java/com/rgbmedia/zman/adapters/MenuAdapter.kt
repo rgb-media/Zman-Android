@@ -62,6 +62,10 @@ class MenuAdapter(private val dataSet: List<MainMenuElement>, private val mainVi
             viewHolder.itemsRecyclerView.adapter = MenuItemsAdapter(menuElement.items.toList(), mainViewModel, position)
         } else {
             viewHolder.itemsRecyclerView.adapter = null
+
+            if (position == mainViewModel.getSearchPosition().first) {
+                mainViewModel.setSearchResultsVisible(false)
+            }
         }
     }
 
