@@ -88,6 +88,8 @@ class MainActivity : AppCompatActivity() {
 
         setupSearch()
 
+        setupLogin()
+
         setupArticleHeader()
 
         initWebView()
@@ -238,6 +240,21 @@ class MainActivity : AppCompatActivity() {
             } else {
                 mainViewModel.setSearchResultsVisible(false)
             }
+        }
+    }
+
+    private fun setupLogin() {
+        mainViewModel.getShowLogin().observe(this) {
+            if (it) {
+                binding.loginView.visibility = View.VISIBLE
+            } else {
+                binding.loginView.visibility = View.GONE
+            }
+
+        }
+
+        binding.loginClose.setOnClickListener {
+            mainViewModel.setShowLogin(false)
         }
     }
 

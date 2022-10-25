@@ -17,6 +17,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.RecyclerView
 import com.rgbmedia.zman.*
 import com.rgbmedia.zman.models.MenuItem
+import com.rgbmedia.zman.utils.LoginState
 import com.rgbmedia.zman.utils.Utils
 import com.rgbmedia.zman.viewmodels.MainViewModel
 import kotlinx.coroutines.Job
@@ -191,7 +192,16 @@ class MenuItemsAdapter(private val dataSet: List<MenuItem>, private val mainView
 
             viewHolder.itemView.setOnClickListener {
                 if (menuItem.link != null) {
+                    if (menuItem.type == "loggedIn") {
+                        if (!LoginState.isLoggedIn()) {
+                            mainViewModel.setShowLogin(true)
+
+                            return@setOnClickListener
+                        }
+                    }
+
                     if (menuItem.link.contains(DOMAIN_NAME) && !menuItem.link.contains("facebook.com")) {
+//                      webViewModel.urlString = menuItem.type == "viewProfile" ? "\(link)\(LoginState.getId())/" : link
                         mainViewModel.setWebviewUrlString(menuItem.link)
 
                         mainViewModel.setShowMenu(false)
@@ -204,12 +214,6 @@ class MenuItemsAdapter(private val dataSet: List<MenuItem>, private val mainView
                             }
                         ContextCompat.startActivity(ZmanApplication.instance, browserIntent, null)
                     }
-
-//                if link.contains(Constants.DOMAIN_NAME) && !link.contains("facebook.com") {
-//                    webViewModel.urlString = menuItem.type == "viewProfile" ? "\(link)\(LoginState.getId())/" : link
-//                } else if let url = URL(string: link) {
-//                    UIApplication.shared.open(url, options: [:], completionHandler: nil)
-//                }
                 }
             }
         }

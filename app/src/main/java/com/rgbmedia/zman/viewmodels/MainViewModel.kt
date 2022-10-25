@@ -18,6 +18,7 @@ class MainViewModel(private val menuRepository: MenuRepository,
 
     private var menuLiveData = MutableLiveData<List<MainMenuElement>>()
     private var showMenu = MutableLiveData(false)
+    private var showLogin = MutableLiveData(false)
     private var webviewUrlString = MutableLiveData(HOMEPAGE_URL)
     private var selectedMenuItem = MutableLiveData(Pair(0, 0))
     private var oldSelectedMenuItem = Pair(0, 0)
@@ -35,6 +36,12 @@ class MainViewModel(private val menuRepository: MenuRepository,
 
     fun setShowMenu(show: Boolean) {
         showMenu.value = show
+    }
+
+    fun getShowLogin(): LiveData<Boolean> = showLogin
+
+    fun setShowLogin(show: Boolean) {
+        showLogin.value = show
     }
 
     fun getWebviewUrlString(): LiveData<String> = webviewUrlString

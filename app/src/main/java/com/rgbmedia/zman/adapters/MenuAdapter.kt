@@ -44,12 +44,6 @@ class MenuAdapter(private val dataSet: List<MainMenuElement>, private val mainVi
             if (data.expanded) {
                 viewHolder.imageView.setImageResource(R.drawable.arrow_up)
             }
-
-            viewHolder.itemView.setOnClickListener {
-                data.expanded = !data.expanded
-
-                notifyItemChanged(position)
-            }
         } else {
             if (menuElement.type == "login" && LoginState.isLoggedIn()) {
             } else {
@@ -65,6 +59,18 @@ class MenuAdapter(private val dataSet: List<MainMenuElement>, private val mainVi
 
             if (position == mainViewModel.getSearchPosition().first) {
                 mainViewModel.setSearchResultsVisible(false)
+            }
+        }
+
+        viewHolder.itemView.setOnClickListener {
+            if (menuElement.type == "login") {
+                if (!LoginState.isLoggedIn()) {
+                    mainViewModel.setShowLogin(true)
+                }
+            } else {
+                data.expanded = !data.expanded
+
+                notifyItemChanged(position)
             }
         }
     }
