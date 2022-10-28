@@ -1,4 +1,8 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="menu_subitem_image_witdh">16dp</dimen>
+    <dimen name="menu_item_image_size">30dp</dimen>
+    <dimen name="section_on_margin_normal">43dp</dimen>
+    <dimen name="section_on_margin_logged_in">63dp</dimen>
+
 </resources>

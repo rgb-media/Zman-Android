@@ -5,8 +5,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rgbmedia.zman.HOMEPAGE_URL
+import com.rgbmedia.zman.models.LoginData
+import com.rgbmedia.zman.models.LoginModel
 import com.rgbmedia.zman.models.MenuElement
 import com.rgbmedia.zman.models.SearchResult
+import com.rgbmedia.zman.network.LoginRepository
 import com.rgbmedia.zman.network.MenuRepository
 import com.rgbmedia.zman.network.NewsletterRepository
 import com.rgbmedia.zman.network.SearchRepository
@@ -14,11 +17,13 @@ import kotlinx.coroutines.launch
 
 class MainViewModel(private val menuRepository: MenuRepository,
                     private val newsletterRepository: NewsletterRepository,
-                    private val searchRepository: SearchRepository) : ViewModel() {
+                    private val searchRepository: SearchRepository,
+                    private val loginRepository: LoginRepository) : ViewModel() {
 
     private var menuLiveData = MutableLiveData<List<MainMenuElement>>()
     private var showMenu = MutableLiveData(false)
     private var showLogin = MutableLiveData(false)
+    private var showLogout = MutableLiveData(false)
     private var webviewUrlString = MutableLiveData(HOMEPAGE_URL)
     private var selectedMenuItem = MutableLiveData(Pair(0, 0))
     private var oldSelectedMenuItem = Pair(0, 0)
@@ -27,6 +32,20 @@ class MainViewModel(private val menuRepository: MenuRepository,
     private var searchResponse = MutableLiveData(arrayOf<SearchResult>())
     private var searchPosition = Pair(0, 0)
     private var searchResultsVisible = MutableLiveData(false)
+    private var loginData = MutableLiveData(LoginModel("", false, LoginData("", "", "")))
+    private var loginError = MutableLiveData("")
+
+    fun getLoginData() = loginData
+
+    fun setLoginData(data: LoginModel) {
+        loginData.value = data
+    }
+
+    fun getLoginError() = loginError
+
+    fun setLoginError(error: String) {
+        loginError.value = error
+    }
 
     fun getMenu(): LiveData<List<MainMenuElement>> {
         return menuLiveData
@@ -42,6 +61,12 @@ class MainViewModel(private val menuRepository: MenuRepository,
 
     fun setShowLogin(show: Boolean) {
         showLogin.value = show
+    }
+
+    fun getShowLogout() = showLogout
+
+    fun setShowLogout(show: Boolean) {
+        showLogout.value = show
     }
 
     fun getWebviewUrlString(): LiveData<String> = webviewUrlString
@@ -103,6 +128,20 @@ class MainViewModel(private val menuRepository: MenuRepository,
             val response = searchRepository.search(text)
 
             searchResponse.value = response.results
+        }
+    }
+
+    fun loginWithFb(userId: String,
+                    userName: String,
+                    userEmail: String,
+                    userPicture: String,
+                    accessToken: String) {
+        viewModelScope.launch {
+            val response = loginRepository.loginWithFb(userId, userName, userEmail, userPicture, accessToken)
+
+            if (response.status == "logged_in") {
+                loginData.value = response
+            }
         }
     }
 

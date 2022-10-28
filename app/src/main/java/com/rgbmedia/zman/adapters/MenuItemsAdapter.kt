@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.rgbmedia.zman.*
 import com.rgbmedia.zman.models.MenuItem
 import com.rgbmedia.zman.utils.LoginState
+import com.rgbmedia.zman.utils.LoginStatus
 import com.rgbmedia.zman.utils.Utils
 import com.rgbmedia.zman.viewmodels.MainViewModel
 import kotlinx.coroutines.Job
@@ -165,6 +166,13 @@ class MenuItemsAdapter(private val dataSet: List<MenuItem>, private val mainView
             viewHolder.textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16f)
             viewHolder.textView.alpha = 1f
 
+            val params = viewHolder.sectionOn.layoutParams as LinearLayoutCompat.LayoutParams
+            params.rightMargin = ZmanApplication.instance.resources.getDimension(R.dimen.section_on_margin_normal).toInt()
+
+            if (dataSet.last().type == "logOut") {
+                params.rightMargin = ZmanApplication.instance.resources.getDimension(R.dimen.section_on_margin_logged_in).toInt()
+            }
+
             if (menuItem.type == "image") {
                 viewHolder.textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 11f)
                 viewHolder.textView.alpha = 0.7f
@@ -191,6 +199,15 @@ class MenuItemsAdapter(private val dataSet: List<MenuItem>, private val mainView
             }
 
             viewHolder.itemView.setOnClickListener {
+                if (menuItem.type == "logOut") {
+                    mainViewModel.setShowLogout(true)
+
+                    LoginState.setLoginStatus(LoginStatus.notLoggedIn)
+                    LoginState.setLoginData("")
+
+                    return@setOnClickListener
+                }
+
                 if (menuItem.link != null) {
                     if (menuItem.type == "loggedIn") {
                         if (!LoginState.isLoggedIn()) {
@@ -201,8 +218,11 @@ class MenuItemsAdapter(private val dataSet: List<MenuItem>, private val mainView
                     }
 
                     if (menuItem.link.contains(DOMAIN_NAME) && !menuItem.link.contains("facebook.com")) {
-//                      webViewModel.urlString = menuItem.type == "viewProfile" ? "\(link)\(LoginState.getId())/" : link
-                        mainViewModel.setWebviewUrlString(menuItem.link)
+                        if (menuItem.type == "viewProfile") {
+                            mainViewModel.setWebviewUrlString(menuItem.link + "\\${LoginState.getId()}")
+                        } else {
+                            mainViewModel.setWebviewUrlString(menuItem.link)
+                        }
 
                         mainViewModel.setShowMenu(false)
 

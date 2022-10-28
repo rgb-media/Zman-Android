@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="20dp"
-            android:layout_marginRight="43dp"
+            android:layout_marginRight="@dimen/section_on_margin_normal"
             android:src="@drawable/section_on" />
 
     </androidx.appcompat.widget.LinearLayoutCompat>

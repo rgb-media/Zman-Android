@@ -3,10 +3,14 @@ package com.rgbmedia.zman.utils
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.content.Context
+import android.content.DialogInterface
 import android.view.View
 import android.view.animation.LinearInterpolator
 import androidx.appcompat.app.AlertDialog
+import com.google.gson.Gson
 import com.rgbmedia.zman.MENU_ANIMATION_DURATION
+import com.rgbmedia.zman.models.LoginData
+import com.rgbmedia.zman.models.LoginModel
 
 class Utils {
     companion object {
@@ -32,14 +36,46 @@ class Utils {
         }
 
         fun showSimpleAlert(context: Context, title: String, message: String) {
+            showSimpleAlert(context, title, message, null)
+        }
+
+        fun showSimpleAlert(context: Context, title: String, message: String, listener: DialogInterface.OnClickListener?) {
             val builder = AlertDialog.Builder(context)
 
             with(builder) {
                 setTitle(title)
                 setMessage(message)
-                setPositiveButton("OK", null)
+                setPositiveButton("OK", listener)
                 show()
             }
+        }
+
+        fun getDataStringFromLoginModel(model: LoginModel): String {
+            val gson = Gson()
+
+            return gson.toJson(model.data)
+        }
+
+        fun getCookieFromLoginModel(model: LoginModel): String {
+            val data = getDataStringFromLoginModel(model)
+
+            return "writer_data=" + data + "; expires=Sat, 01-Jan-2030 00:00:00 GMT; path=/"
+        }
+
+        fun getProfileIdFromDataString(dataString: String): String {
+            val gson = Gson()
+
+            val data = gson.fromJson(dataString, LoginData::class.java)
+
+            return data.id
+        }
+
+        fun getProfileImageFromDataString(dataString: String): String {
+            val gson = Gson()
+
+            val data = gson.fromJson(dataString, LoginData::class.java)
+
+            return data.image
         }
     }
 }

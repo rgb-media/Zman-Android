@@ -1,6 +1,7 @@
 package com.rgbmedia.zman
 
 import android.annotation.SuppressLint
+import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -15,24 +16,32 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.facebook.CallbackManager
 import com.rgbmedia.zman.adapters.MenuAdapter
 import com.rgbmedia.zman.adapters.SearchAdapter
 import com.rgbmedia.zman.databinding.ActivityMainBinding
 import com.rgbmedia.zman.network.*
+import com.rgbmedia.zman.utils.LoginState
+import com.rgbmedia.zman.utils.LoginStatus
 import com.rgbmedia.zman.utils.Utils
+import com.rgbmedia.zman.viewmodels.FacebookLoginManager
 import com.rgbmedia.zman.viewmodels.MainViewModel
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
+
 
 class MainActivity : AppCompatActivity() {
 
     class MenuViewModelFactory(private val menuApi: MenuRepository,
                                private val newsletterApi: NewsletterRepository,
-                               private val searchApi: SearchRepository) : ViewModelProvider.Factory {
+                               private val searchApi: SearchRepository,
+                               private val loginApi: LoginRepository) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return MainViewModel(menuApi, newsletterApi, searchApi) as T
+            return MainViewModel(menuApi, newsletterApi, searchApi, loginApi) as T
         }
     }
 
@@ -68,9 +77,31 @@ class MainActivity : AppCompatActivity() {
 
         SearchRepository(api)
     }
-    private val mainViewModel: MainViewModel by viewModels { MenuViewModelFactory(menuApi, newsletterApi, searchApi) }
+    private val loginApi by lazy {
+        val logging = HttpLoggingInterceptor()
+        logging.level = HttpLoggingInterceptor.Level.BODY
+
+        val client = OkHttpClient.Builder()
+            .addInterceptor(logging)
+            .build()
+
+        val retrofit = Retrofit.Builder()
+            .addConverterFactory(GsonConverterFactory.create())
+            .baseUrl(LOGIN_URL)
+            .client(client)
+            .build()
+
+        val api = retrofit.create(LoginService::class.java)
+
+        LoginRepository(api)
+    }
+    private val mainViewModel: MainViewModel by viewModels { MenuViewModelFactory(menuApi, newsletterApi, searchApi, loginApi) }
 
     private var menuHeight = -1
+
+    private val callbackManager = CallbackManager.Factory.create()
+
+    private val facebookLoginManager by lazy { FacebookLoginManager(mainViewModel) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -256,6 +287,52 @@ class MainActivity : AppCompatActivity() {
         binding.loginClose.setOnClickListener {
             mainViewModel.setShowLogin(false)
         }
+
+        binding.loginFb.setOnClickListener {
+            facebookLoginManager.login(this, callbackManager)
+        }
+
+        mainViewModel.getLoginError().observe(this) {
+            if (it.isNotEmpty()) {
+                Utils.showSimpleAlert(this, getString(R.string.fb_error), it)
+            }
+        }
+
+        mainViewModel.getLoginData().observe(this) {
+            if (it.status.isNotEmpty()) {
+                Utils.showSimpleAlert(this, getString(R.string.info), getString(R.string.fb_success)) { _, _ ->
+                    mainViewModel.setShowLogin(false)
+                    mainViewModel.setShowMenu(false)
+
+                    binding.menuRecyclerView.adapter?.notifyItemChanged(binding.menuRecyclerView.adapter!!.itemCount - 1)
+                }
+
+                val dataString = Utils.getDataStringFromLoginModel(it)
+
+                LoginState.setLoginStatus(LoginStatus.loggedInWithFb)
+                LoginState.setLoginData(dataString)
+
+                val cookie = Utils.getCookieFromLoginModel(it)
+                CookieManager.getInstance().setCookie(".zman.co.il", cookie) {
+                    Log.d("Cookies", "User data cookie set: $it")
+                }
+            }
+        }
+
+        mainViewModel.getShowLogout().observe(this) {
+            if (it) {
+                Utils.showSimpleAlert(this, getString(R.string.info), getString(R.string.logout))
+
+                binding.menuRecyclerView.adapter?.notifyItemChanged(binding.menuRecyclerView.adapter!!.itemCount - 1)
+            }
+        }
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        callbackManager.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun setupArticleHeader() {
