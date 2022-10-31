@@ -1,7 +1,6 @@
 package com.rgbmedia.zman
 
 import android.annotation.SuppressLint
-import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -31,7 +30,6 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
-
 
 class MainActivity : AppCompatActivity() {
 
@@ -281,7 +279,6 @@ class MainActivity : AppCompatActivity() {
             } else {
                 binding.loginView.visibility = View.GONE
             }
-
         }
 
         binding.loginClose.setOnClickListener {
@@ -341,8 +338,6 @@ class MainActivity : AppCompatActivity() {
                 binding.webView.goBack()
             } else {
                 binding.webView.evaluateJavascript("rgb.closePopupArticleInApp()", null)
-
-                binding.headerArticle.visibility = View.GONE
             }
         }
 
@@ -359,8 +354,6 @@ class MainActivity : AppCompatActivity() {
 
         binding.closeButton.setOnClickListener {
             binding.webView.evaluateJavascript("rgb.closePopupArticleInApp()", null)
-
-            binding.headerArticle.visibility = View.GONE
         }
     }
 
@@ -387,6 +380,19 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface
         fun popupClosed() {
             Log.d("RGBJavascript", "popupClosed")
+
+            runOnUiThread {
+                binding.headerArticle.visibility = View.GONE
+            }
+        }
+
+        @JavascriptInterface
+        fun popupLoginOpened() {
+            Log.d("RGBJavascript", "popupLoginOpened")
+
+            runOnUiThread {
+                mainViewModel.setShowLogin(true)
+            }
         }
     }
 }

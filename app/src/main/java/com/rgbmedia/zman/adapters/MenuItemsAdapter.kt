@@ -2,10 +2,12 @@ package com.rgbmedia.zman.adapters
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.CookieManager
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.RelativeLayout
@@ -204,6 +206,10 @@ class MenuItemsAdapter(private val dataSet: List<MenuItem>, private val mainView
 
                     LoginState.setLoginStatus(LoginStatus.notLoggedIn)
                     LoginState.setLoginData("")
+
+                    CookieManager.getInstance().setCookie(".zman.co.il", "writer_data=") {
+                        Log.d("Cookies", "User data cookie cleared")
+                    }
 
                     return@setOnClickListener
                 }

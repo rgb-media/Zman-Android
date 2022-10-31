@@ -10,9 +10,9 @@
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
 
-    <string name="facebook_app_id">396231439173973</string>
-    <string name="fb_login_protocol_scheme">fb396231439173973</string>
-    <string name="facebook_client_token">7e038fcafca6d7af709962525eb0db48</string>
+    <string name="facebook_app_id">1284316105702184</string>
+    <string name="fb_login_protocol_scheme">fb1284316105702184</string>
+    <string name="facebook_client_token">dcea69f04679b965dd7230aa4bcca5d2</string>
 
     <string name="info">"זמן ישראל"</string>
     <string name="fb_success">"התחברת באמצעות Facebook"</string>
