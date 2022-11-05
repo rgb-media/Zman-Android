@@ -52,12 +52,10 @@ class LoginState {
             return status == LoginStatus.loggedInWithFb || status == LoginStatus.loggedInWithTwitter
         }
 
-        fun getId(): String {
-            return Utils.getProfileIdFromDataString(getLoginData())
-        }
+        fun getId() = Utils.getProfileIdFromDataString(getLoginData())
 
-        fun getImage(): String {
-            return Utils.getProfileImageFromDataString(getLoginData())
-        }
+        fun getImage() = Utils.getProfileImageFromDataString(getLoginData())
+
+        fun getName() = Utils.getProfileNameFromDataString(getLoginData())
     }
 }

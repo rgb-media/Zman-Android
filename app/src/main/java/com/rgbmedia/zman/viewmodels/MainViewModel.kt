@@ -13,6 +13,7 @@ import com.rgbmedia.zman.network.LoginRepository
 import com.rgbmedia.zman.network.MenuRepository
 import com.rgbmedia.zman.network.NewsletterRepository
 import com.rgbmedia.zman.network.SearchRepository
+import com.rgbmedia.zman.utils.LoginStatus
 import kotlinx.coroutines.launch
 
 class MainViewModel(private val menuRepository: MenuRepository,
@@ -24,6 +25,7 @@ class MainViewModel(private val menuRepository: MenuRepository,
     private var showMenu = MutableLiveData(false)
     private var showLogin = MutableLiveData(false)
     private var showLogout = MutableLiveData(false)
+    private var showLoading = MutableLiveData(false)
     private var webviewUrlString = MutableLiveData(HOMEPAGE_URL)
     private var selectedMenuItem = MutableLiveData(Pair(0, 0))
     private var oldSelectedMenuItem = Pair(0, 0)
@@ -32,7 +34,7 @@ class MainViewModel(private val menuRepository: MenuRepository,
     private var searchResponse = MutableLiveData(arrayOf<SearchResult>())
     private var searchPosition = Pair(0, 0)
     private var searchResultsVisible = MutableLiveData(false)
-    private var loginData = MutableLiveData(LoginModel("", false, LoginData("", "", "")))
+    private var loginData = MutableLiveData(LoginModel(LoginStatus.notLoggedIn, "", false, LoginData("", "", "")))
     private var loginError = MutableLiveData("")
 
     fun getLoginData() = loginData
@@ -67,6 +69,12 @@ class MainViewModel(private val menuRepository: MenuRepository,
 
     fun setShowLogout(show: Boolean) {
         showLogout.value = show
+    }
+
+    fun getShowLoading() = showLoading
+
+    fun setShowLoading(show: Boolean) {
+        showLoading.value = show
     }
 
     fun getWebviewUrlString(): LiveData<String> = webviewUrlString
@@ -131,15 +139,23 @@ class MainViewModel(private val menuRepository: MenuRepository,
         }
     }
 
-    fun loginWithFb(userId: String,
-                    userName: String,
-                    userEmail: String,
-                    userPicture: String,
-                    accessToken: String) {
+    fun loginWithFb(userId: String, userName: String, userEmail: String, userPicture: String, accessToken: String) {
         viewModelScope.launch {
             val response = loginRepository.loginWithFb(userId, userName, userEmail, userPicture, accessToken)
 
             if (response.status == "logged_in") {
+                response.type = LoginStatus.loggedInWithFb
+                loginData.value = response
+            }
+        }
+    }
+
+    fun loginWithTwitter(userEmail: String, screenName: String) {
+        viewModelScope.launch {
+            val response = loginRepository.loginWithTwitter(userEmail, screenName)
+
+            if (response.status == "logged_in") {
+                response.type = LoginStatus.loggedInWithTwitter
                 loginData.value = response
             }
         }

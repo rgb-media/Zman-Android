@@ -11,5 +11,10 @@ interface LoginService {
                             @Query("user_name") user_name: String,
                             @Query("user_email") user_email: String,
                             @Query("user_picture") user_picture: String,
-                            @Query("access_token") access_token: String) : LoginModel
+                            @Query("access_token") access_token: String): LoginModel
+
+    @POST("app_user_login_actions.php")
+    suspend fun loginWithTwitter(@Query("action") action: String,
+                                 @Query("user_email") user_email: String,
+                                 @Query("screen_name") screen_name: String): LoginModel
 }

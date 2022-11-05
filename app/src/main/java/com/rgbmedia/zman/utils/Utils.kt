@@ -77,5 +77,13 @@ class Utils {
 
             return data.image
         }
+
+        fun getProfileNameFromDataString(dataString: String): String {
+            val gson = Gson()
+
+            val data = gson.fromJson(dataString, LoginData::class.java)
+
+            return data.name
+        }
     }
 }

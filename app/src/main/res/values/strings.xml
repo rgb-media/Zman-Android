@@ -14,6 +14,9 @@
     <string name="fb_login_protocol_scheme">fb1284316105702184</string>
     <string name="facebook_client_token">dcea69f04679b965dd7230aa4bcca5d2</string>
 
+    <string name="twitter_consumer_key">yR6HXz4NpGVZ4o1b5fudAmosW</string>
+    <string name="twitter_consumer_secret">o6B0xBtANNoFJlPLDJyWhMqLjasBCZipC4VgSU9OjcRoArYADd</string>
+
     <string name="info">"זמן ישראל"</string>
     <string name="fb_success">"התחברת באמצעות Facebook"</string>
     <string name="fb_error">"שגיאה בהתחברות באמצעות Facebook"</string>

@@ -155,6 +155,9 @@ class MenuItemsAdapter(private val dataSet: List<MenuItem>, private val mainView
             val viewHolder = holder as StandardViewHolder
 
             viewHolder.textView.text = menuItem.title
+            if (menuItem.type == "viewProfile") {
+                viewHolder.textView.text = "${LoginState.getName()} ${menuItem.title}"
+            }
 
             if (mainViewModel.getWebviewUrlString().value == menuItem.link) {
                 viewHolder.sectionOn.visibility = View.VISIBLE

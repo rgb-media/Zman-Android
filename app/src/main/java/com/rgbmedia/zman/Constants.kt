@@ -10,4 +10,3 @@ const val SENDGRID_URL  = "https://dev.zman.co.il/wp-content/themes/rgb/function
 const val MENU_ANIMATION_DURATION = 700L
 
 const val TEXT_GENERIC_ERROR = "ERROR"
-

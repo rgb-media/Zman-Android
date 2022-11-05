@@ -25,6 +25,7 @@ import com.rgbmedia.zman.utils.LoginStatus
 import com.rgbmedia.zman.utils.Utils
 import com.rgbmedia.zman.viewmodels.FacebookLoginManager
 import com.rgbmedia.zman.viewmodels.MainViewModel
+import com.rgbmedia.zman.viewmodels.TwitterLoginManager
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -100,6 +101,7 @@ class MainActivity : AppCompatActivity() {
     private val callbackManager = CallbackManager.Factory.create()
 
     private val facebookLoginManager by lazy { FacebookLoginManager(mainViewModel) }
+    private val twitterLoginManager by lazy { TwitterLoginManager(this, mainViewModel) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -286,18 +288,35 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.loginFb.setOnClickListener {
+            mainViewModel.setShowLoading(true)
+
             facebookLoginManager.login(this, callbackManager)
+        }
+
+        binding.loginTwitter.setOnClickListener {
+            mainViewModel.setShowLoading(true)
+
+            twitterLoginManager.login()
         }
 
         mainViewModel.getLoginError().observe(this) {
             if (it.isNotEmpty()) {
+                mainViewModel.setShowLoading(false)
+
                 Utils.showSimpleAlert(this, getString(R.string.fb_error), it)
             }
         }
 
         mainViewModel.getLoginData().observe(this) {
             if (it.status.isNotEmpty()) {
-                Utils.showSimpleAlert(this, getString(R.string.info), getString(R.string.fb_success)) { _, _ ->
+                mainViewModel.setShowLoading(false)
+
+                var message = getString(R.string.fb_success)
+                if (it.type == LoginStatus.loggedInWithTwitter) {
+                    message = getString(R.string.twitter_success)
+                }
+
+                Utils.showSimpleAlert(this, getString(R.string.info), message) { _, _ ->
                     mainViewModel.setShowLogin(false)
                     mainViewModel.setShowMenu(false)
 
@@ -306,7 +325,7 @@ class MainActivity : AppCompatActivity() {
 
                 val dataString = Utils.getDataStringFromLoginModel(it)
 
-                LoginState.setLoginStatus(LoginStatus.loggedInWithFb)
+                LoginState.setLoginStatus(it.type)
                 LoginState.setLoginData(dataString)
 
                 val cookie = Utils.getCookieFromLoginModel(it)
@@ -323,6 +342,14 @@ class MainActivity : AppCompatActivity() {
                 binding.menuRecyclerView.adapter?.notifyItemChanged(binding.menuRecyclerView.adapter!!.itemCount - 1)
             }
         }
+
+        mainViewModel.getShowLoading().observe(this) {
+            if (it) {
+                binding.loadingView.visibility = View.VISIBLE
+            } else {
+                binding.loadingView.visibility = View.GONE
+            }
+        }
     }
 
     @Deprecated("Deprecated in Java")
@@ -330,6 +357,7 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         callbackManager.onActivityResult(requestCode, resultCode, data)
+        twitterLoginManager.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun setupArticleHeader() {
