@@ -14,8 +14,8 @@
     <string name="fb_login_protocol_scheme">fb2099943966963375</string>
     <string name="facebook_client_token">a1b4bdd9e665f0d9a697f0c989a6dfc7</string>
 
-    <string name="twitter_consumer_key">yR6HXz4NpGVZ4o1b5fudAmosW</string>
-    <string name="twitter_consumer_secret">o6B0xBtANNoFJlPLDJyWhMqLjasBCZipC4VgSU9OjcRoArYADd</string>
+    <string name="twitter_consumer_key">mzbdGm9sVf6CNURhbSViH4hPa</string>
+    <string name="twitter_consumer_secret">f95NMW29BwjLWobS4W40O2X0Aym1IhkzukkFM3S8M67IyrkNCy</string>
 
     <string name="info">"זמן ישראל"</string>
     <string name="fb_success">"התחברת באמצעות Facebook"</string>
